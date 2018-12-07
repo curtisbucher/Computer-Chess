@@ -37,23 +37,27 @@ def gen_possible_moves(board, black = True):
 while True:
     ChessBoard.draw_board(board, False)
     
-    start, end = ChessBoard.get_move()
-    while not ChessBoard.legal_move(board, start, end, False):
+    user_move = ChessBoard.get_move(board,False)
+    while not user_move.legal_move:
         print("Illegal Move")
-        start, end = ChessBoard.get_move()
-    board.move_piece(start,end)
+        print(user_move.black)
+        user_move = ChessBoard.get_move(board,False)
+    user_move.execute()
+
+    max_move = random.choice(gen_possible_moves(board))
 
     ## Making random legal move for AI
-    max_score = -math.inf
-    max_move = gen_possible_moves(board)[0]
-    for move in gen_possible_moves(board):
-        start, end = move
-        score = score(board, True, start, end)
-        if score > max_score:
-            max_score = score
-            max_move = move
+##    max_score = -math.inf
+##    max_move = gen_possible_moves(board)[0]
+##    for move in gen_possible_moves(board):
+##        start, end = move
+##        score = score(board, True, start, end)
+##        if score > max_score:
+##            max_score = score
+##            max_move = move
             
     max_move.execute()
     print("<<<",end=" ")
-    print(move)
+    print(max_move)
+
 
