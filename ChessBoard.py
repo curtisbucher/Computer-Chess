@@ -25,11 +25,11 @@ class chessboard:
         self.king = "Kk"
         self.queen = "Qq"
                 
-    def move_piece(self,start_coords, end_coords):
+    def move_piece(self, move):
         """ Moves a peice from one spot to another on the board, regardless of
         legality. The starting position of the peice is left empty"""
-        ax,ay = end_coords
-        x,y = start_coords
+        ax,ay = move.end_coords
+        x,y = move.start_coords
         
         self.pieces[ay][ax] = self.pieces[y][x]
         self.pieces[y][x] = " "
@@ -37,26 +37,38 @@ class chessboard:
 class move:
     """ This class includes all the variables for a single move on the chessboard, as well
     as mathods for moving"""
-    def __init__(self,board,start_coords, end_coords, black = True):
+    def __init__(self,board, start_coords, end_coords, black = False):
         """ Defining the necessary movement variables, as well as a boolean for legal_move"""
         self.board = board
         self.start_coords = start_coords
         self.end_coords = end_coords
+        self.black = black
 
-        self.legal_move = legal_move(self.board, self.start_coords, self.end_coords, black)
+        if board:
+            self.legal_move = legal_move(self.board, self.start_coords, self.end_coords, black)
     
     def execute(self):
         """ If the move is legal, moves the peice and returns true, else returns false"""
         if self.legal_move:
-            self.board.move_piece(self.start_coords, self.end_coords)
+            self.board.move_piece(self)
             return True
         return False
     
     def __str__(self):
+        """ Returns a string of the move in chess notation. Ex, A1B2"""
         letters = ["A","B","C","D","E","F","G","H"]
         return (letters[self.start_coords[0]] + str(self.start_coords[1]) +
                letters[self.end_coords[0]] + str(self.end_coords[1]))
+    def __iter__(self):
+        """ Allows tuple() or list() to be called on a move object. Returns a two part iterable with
+        start coords at index 0 and end coords at index 1"""
+        for i in range(1):
+            if not i:
+                yield self.start_coords
+            else:
+                yield self.end_coords
     def __eq__(self, other):
+        """ Tests if two move objects are equal to one another"""
         return(self.start_coords == other.start_coords and other.end_coords == self.end_coords)
         
 
@@ -254,13 +266,15 @@ def legal_queen(board, start, end):
     else:
         return False
         
-def get_move():
+def get_move(board = False, black = False):
     letters = ["A","B","C","D","E","F","G","H"]
     raw = input(">>> ")
 
     start = (letters.index(raw[0]),int(raw[1]))
     end = (letters.index(raw[2]), int(raw[3]))
-    return start, end
+    
+    new_move = move(board, start, end, black)
+    return new_move
         
 def draw_board(board,flipped = False):
     """ Prints the chess board from the white perspective unless
@@ -309,11 +323,11 @@ if __name__ == "__main__":
     board = chessboard()
     while True:
         draw_board(board, turn%2)
-        start, end = get_move()
-        while not legal_move(board, start, end, turn%2):
+        new_move = get_move(board,turn%2)
+        while not new_move.legal_move:
             print("Illegal Move")
-            start, end = get_move()
-        board.move_piece(start,end)
+            new_move = get_move(board,turn%2)
+        new_move.execute()
         turn += 1
     
     
