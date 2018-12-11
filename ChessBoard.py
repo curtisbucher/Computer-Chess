@@ -1,6 +1,6 @@
 ## A Chess package for playing chess against another user
 ## Problem with legal bishop function alwasy out of range when scanning to make sure path is clear.
-
+import copy
 class chessboard:
     """ The Chessboard object that contains the peices and their positions on
     the board, and enables the user to move the peices, legally or otherwise"""
@@ -16,8 +16,9 @@ class chessboard:
                           ["P","P","P","P","P","P","P","P"],
                           ["R","H","B","K","Q","B","H","R"]]
         else:
-            self.pieces = board.pieces
-
+            self.pieces = copy.deepcopy(board.pieces)
+            
+        self.board = board
         self.pawn = "Pp"
         self.rook = "Rr"
         self.horse = "Hh"
@@ -25,11 +26,11 @@ class chessboard:
         self.king = "Kk"
         self.queen = "Qq"
                 
-    def move_piece(self, move):
+    def move_piece(self, start_coords, end_coords):
         """ Moves a peice from one spot to another on the board, regardless of
         legality. The starting position of the peice is left empty"""
-        ax,ay = move.end_coords
-        x,y = move.start_coords
+        ax,ay = end_coords
+        x,y = start_coords
         
         self.pieces[ay][ax] = self.pieces[y][x]
         self.pieces[y][x] = " "
@@ -50,7 +51,7 @@ class move:
     def execute(self):
         """ If the move is legal, moves the peice and returns true, else returns false"""
         if self.legal_move:
-            self.board.move_piece(self)
+            self.board.move_piece(self.start_coords, self.end_coords)
             return True
         return False
     
@@ -62,7 +63,7 @@ class move:
     def __iter__(self):
         """ Allows tuple() or list() to be called on a move object. Returns a two part iterable with
         start coords at index 0 and end coords at index 1"""
-        for i in range(1):
+        for i in range(2):
             if not i:
                 yield self.start_coords
             else:
@@ -329,7 +330,3 @@ if __name__ == "__main__":
             new_move = get_move(board,turn%2)
         new_move.execute()
         turn += 1
-    
-    
-
-                      
