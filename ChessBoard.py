@@ -44,6 +44,7 @@ class move:
         self.start_coords = start_coords
         self.end_coords = end_coords
         self.black = black
+        self.score = None ## Calculated by user
 
         if board:
             self.legal_move = legal_move(self.board, self.start_coords, self.end_coords, black)
@@ -141,12 +142,12 @@ def legal_black_pawn(board, start, end):
     else:
         return False
 
-def legal_rook(board, start, end):
+def legal_rook(board, start, end, queen = False):
         
     x1, y1 = start
     x2, y2 = end
 
-    if board.pieces[y1][x1] not in board.rook:
+    if (board.pieces[y1][x1] not in board.rook) and not queen:
         return False
     
     dx = abs(x2 - x1)
@@ -184,7 +185,7 @@ def legal_rook(board, start, end):
         return False
 
 def legal_horse(board, start, end):
-
+    return False
     x1, y1 = start
     x2, y2 = end
 
@@ -204,12 +205,12 @@ def legal_horse(board, start, end):
         return False
 
 
-def legal_bishop(board, start, end):
+def legal_bishop(board, start, end, queen = False):
         
     x1, y1 = start
     x2, y2 = end
 
-    if board.pieces[y1][x1] not in board.bishop:
+    if (board.pieces[y1][x1] not in board.bishop) and not queen:
         return False
     
     dx = abs(x2 - x1)
@@ -220,20 +221,20 @@ def legal_bishop(board, start, end):
         return False
 
     # Check to see if the bishop's path is open
-        if(x1 < x2):
-            directionX = 1
-        else:
-            directionX = -1
+    if(x1 < x2):
+        directionX = 1
+    else:
+        directionX = -1
 
-        if(y1 < y2):
-            directionY = 1
-        else:
-            directionY = -1
+    if(y1 < y2):
+        directionY = 1
+    else:
+        directionY = -1
 
-        for a in range(1,dx):
-            if board.pieces[y1 +(a * directionY)][x1+ (a*directionX)] != " ":
-                return False
-
+    for a in range(1,dx):
+        if board.pieces[y1 +(a * directionY)][x1+ (a*directionX)] != " ":
+            return False
+    return True
 def legal_king(board, start, end):
         
     x1, y1 = start
@@ -246,9 +247,7 @@ def legal_king(board, start, end):
     dy = abs(y2 - y1)
 
 # Can only move 1 tile in 1 direction
-    if dy == 1 and dx == 0:
-        return True
-    elif dx == 1 and dy == 0:
+    if dy < 2 and dx < 2:
         return True
     else:
         return False
@@ -262,7 +261,7 @@ def legal_queen(board, start, end):
         return False
     
     ## A queen is the same as a rook and bishop combined
-    if legal_bishop(board, start, end) or legal_rook(board, start, end):
+    if legal_bishop(board, start, end, True) or legal_rook(board, start, end, True):
         return True
     else:
         return False
