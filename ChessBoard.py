@@ -185,7 +185,6 @@ def legal_rook(board, start, end, queen = False):
         return False
 
 def legal_horse(board, start, end):
-    return False
     x1, y1 = start
     x2, y2 = end
 
@@ -268,8 +267,8 @@ def legal_queen(board, start, end):
         
 def get_move(board = False, black = False):
     letters = ["A","B","C","D","E","F","G","H"]
-    raw = input(">>> ")
-
+    raw = input(">>> ").upper()
+    
     start = (letters.index(raw[0]),int(raw[1]))
     end = (letters.index(raw[2]), int(raw[3]))
     
