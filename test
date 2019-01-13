@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jan 12 22:29:59 2019
+
+@author: curtisbucher
+"""
+import random
+
+class move:
+    def __init__(self, ):
+        self.score = random.randint(0,10)
+  
+moves =[]      
+for x in range(10):
+    moves.append(move())
+    
+ordered = []
+
+newlist = sorted(moves, key=lambda x: x.score, reverse=True)
+
+for move in newlist:
+    print(move.score)
