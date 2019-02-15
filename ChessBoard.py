@@ -267,11 +267,17 @@ def legal_queen(board, start, end):
         
 def get_move(board = False, black = False):
     letters = ["A","B","C","D","E","F","G","H"]
-    raw = input(">>> ").upper()
-    
-    start = (letters.index(raw[0]),int(raw[1]))
-    end = (letters.index(raw[2]), int(raw[3]))
-    
+    while True:
+        try:
+            raw = input(">>> ").upper()
+            start = (letters.index(raw[0]),int(raw[1]))
+            end = (letters.index(raw[2]), int(raw[3]))
+            break
+        except:
+            print("Invalid Input")
+            pass
+            
+        
     new_move = move(board, start, end, black)
     return new_move
         
@@ -303,9 +309,9 @@ def check(board):
     
     for x in range(8):
         for y in range(8):
-            if board[y][x] == "k":
+            if board.pieces[y][x] == "k":
                 white_king_coords = (x,y)
-            if board[y][x] == "K":
+            if board.pieces[y][x] == "K":
                 black_king_coords = (x,y)
             
                 
