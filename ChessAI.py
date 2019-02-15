@@ -1,6 +1,7 @@
 import ChessBoard
 import random
 import math
+import os
 board = ChessBoard.chessboard()
 
 def gen_possible_moves(board, black = True):
@@ -50,6 +51,7 @@ def recur_score_move(depth, board, black=True, curr_depth = 0):
     ##Scoring
     for move in moves:
         move.score = score(board, move, black)
+        tot_score += move.score
     ## Sorting by score
     sorted_moves = sorted(moves, key=lambda x: x.score, reverse=True)
     moves = sorted_moves[0:3]
@@ -63,14 +65,21 @@ def recur_score_move(depth, board, black=True, curr_depth = 0):
         for move in moves: 
             ## Creating a new board, where the move was executed
             new_board = ChessBoard.chessboard(board)
-            ## Scoring the move
-            tot_score += recur_score_move(depth, new_board, black= black, curr_depth = curr_depth + 1)
+            new_board.move_piece(move.start_coords, move.end_coords)
+            
+            ## Scoring the move by adding all its own possible moves and subtracting the others. Deals with averages
+            if depth%2 == 0: # CPU move
+                tot_score += recur_score_move(depth, new_board, black = black, curr_depth = curr_depth + 1)/(3**depth)
+            else: # Player Move
+                tot_score -= recur_score_move(depth, new_board, black = not black, curr_depth = curr_depth + 1)/(3**depth)
         
     ## returning score to collapse tree if not root
     ##print(curr_depth)
     
     ## If computer's turn to move, curr_depth will be an odd number and score will be returned positive
     ##if curr_depth%2:
+    #os.system('cls')
+    #ChessBoard.draw_board(board, True)
     return tot_score
     
 ## If player's turn to move, curr_depth will be an even numver and score will be returned negetive
@@ -109,8 +118,7 @@ def best_move(board, depth, black=True):
     return max_move
     
 def player_v_CPU():
-    while True:
-        
+    while ("k" in sum(board.pieces,[])) and ("K" in sum(board.pieces,[])):
         ChessBoard.draw_board(board, True)
         
         user_move = ChessBoard.get_move(board,False)
@@ -119,20 +127,20 @@ def player_v_CPU():
             print(user_move.black)
             user_move = ChessBoard.get_move(board,False)
         user_move.execute()
-    
-    #    max_move = random.choice(gen_possible_moves(board))
-    #
-    #    ## Scoring all the moves
-    #    max_score = -math.inf
-    #    max_move = gen_possible_moves(board)[0]
-    #    for score_move in gen_possible_moves(board):
-    #        move_score = score(board, score_move,True)
-    #        if move_score > max_score:
-    #            max_score = move_score
-    #            max_move = score_move
+
+        ## Testing for King in check
+        is_check, is_black = ChessBoard.check(board)
+        if is_check:
+            print(("Black" * is_black)+("White" * (not is_black)) + " king is in check!")
         
         max_move = best_move(board, 4, True)
         max_move.execute()
+
+        ## Testing for King in check
+        is_check, is_black = ChessBoard.check(board)
+        if is_check:
+            print(("Black" * is_black)+("White" * (not is_black)) + " king is in check!")
+        
         ## Ascii bell tone
         print('\a')
     
@@ -145,14 +153,14 @@ def CPU_v_CPU():
         
         ChessBoard.draw_board(board, True)
         
-        A_max_move = best_move(board, 4, False)
+        A_max_move = best_move(board, 3, False)
         A_max_move.execute()
         
         print("<<<",end=" ")
         print("Move: " + str(A_max_move))
         print("    Score: " + str(A_max_move.score))
         
-        B_max_move = best_move(board, 4, True)
+        B_max_move = best_move(board, 3, True)
         B_max_move.execute()
 
     
@@ -160,10 +168,11 @@ def CPU_v_CPU():
         print("Move: " + str(B_max_move))
         print("    Score: " + str(B_max_move.score))
         
-                ## Ascii bell tone
+        ## Ascii bell tone
         print('\a')
         
-CPU_v_CPU()
+##CPU_v_CPU()
+player_v_CPU()
     
 
 
