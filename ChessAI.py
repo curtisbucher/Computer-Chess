@@ -69,7 +69,7 @@ def recur_score_move(depth, board, black=True, curr_depth = 0):
             
             ## Scoring the move by adding all its own possible moves and subtracting the others. Deals with averages
             if depth%2 == 0: # CPU move
-                tot_score += recur_score_move(depth, new_board, black = black, curr_depth = curr_depth + 1)/(3**depth)
+                tot_score -= recur_score_move(depth, new_board, black = black, curr_depth = curr_depth + 1)/(3**depth)
             else: # Player Move
                 tot_score -= recur_score_move(depth, new_board, black = not black, curr_depth = curr_depth + 1)/(3**depth)
         
@@ -95,7 +95,8 @@ def best_move(board, depth, black=True):
     print("-"*len(moves))
         
     
-    for move in moves: 
+    for move in moves:
+        print("#",end="")
         ## Creating a new board, where the move was executed
         new_board = ChessBoard.chessboard(board)
         ## Executing and scoreing move
@@ -104,7 +105,7 @@ def best_move(board, depth, black=True):
         
         ## Recursively scoring next gen possible moves
         move.score += recur_score_move(depth, new_board, black= black, curr_depth = 0)
-        print("#",end="")
+        
     print()
     
     ## Creating new, blank move with default score to be compared to max_move
@@ -173,6 +174,3 @@ def CPU_v_CPU():
         
 ##CPU_v_CPU()
 player_v_CPU()
-    
-
-
