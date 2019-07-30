@@ -1,173 +1,421 @@
-import ChessBoard
-import random
-import math
-import os
-board = ChessBoard.chessboard()
+## A Chess package for playing chess against another user
+## Problem with legal bishop function alwasy out of range when scanning to make sure path is clear.
+import copy
 
-def gen_possible_moves(board, black = True):
-    """ Goes through every single move on the board, finds which ones are
-    legal, then returns a list of move objects that are legal"""
-    legal_moves = []
+
+class chessboard:
+    """ The Chessboard object that contains the peices and their positions on
+    the board, and enables the user to move the peices, legally or otherwise"""
+
+    def __init__(self, board=False):
+        ## Switch capital and lowercase
+        if not board:
+            self.pieces = [
+                ["r", "h", "b", "k", "q", "b", "h", "r"],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                [" ", " ", " ", " ", " ", " ", " ", " "],
+                [" ", " ", " ", " ", " ", " ", " ", " "],
+                [" ", " ", " ", " ", " ", " ", " ", " "],
+                [" ", " ", " ", " ", " ", " ", " ", " "],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                ["R", "H", "B", "K", "Q", "B", "H", "R"],
+            ]
+        else:
+            self.pieces = copy.deepcopy(board.pieces)
+
+        self.board = self
+        self.pawn = "Pp"
+        self.rook = "Rr"
+        self.horse = "Hh"
+        self.bishop = "Bb"
+        self.king = "Kk"
+        self.queen = "Qq"
+
+    def move_piece(self, start_coords, end_coords):
+        """ Moves a peice from one spot to another on the board, regardless of
+        legality. The starting position of the peice is left empty"""
+        ax, ay = end_coords
+        x, y = start_coords
+
+        self.pieces[ay][ax] = self.pieces[y][x]
+        self.pieces[y][x] = " "
+
+
+class move:
+    """ This class includes all the variables for a single move on the chessboard, as well
+    as mathods for moving"""
+
+    def __init__(self, board, start_coords, end_coords, black=False):
+        """ Defining the necessary movement variables, as well as a boolean for legal_move"""
+        self.board = board
+        self.start_coords = start_coords
+        self.end_coords = end_coords
+        self.black = black
+        self.score = None  ## Calculated by user
+
+        if board:
+            self.legal_move = legal_move(
+                self.board, self.start_coords, self.end_coords, black
+            )
+
+    def execute(self):
+        """ If the move is legal, moves the peice and returns true, else returns false"""
+        if self.legal_move:
+            self.board.move_piece(self.start_coords, self.end_coords)
+            return True
+        return False
+
+    def __str__(self):
+        """ Returns a string of the move in chess notation. Ex, A1B2"""
+        letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
+        return (
+            letters[self.start_coords[0]]
+            + str(self.start_coords[1])
+            + letters[self.end_coords[0]]
+            + str(self.end_coords[1])
+        )
+
+    def __iter__(self):
+        """ Allows tuple() or list() to be called on a move object. Returns a two part iterable with
+        start coords at index 0 and end coords at index 1"""
+        for i in range(2):
+            if not i:
+                yield self.start_coords
+            else:
+                yield self.end_coords
+
+    def __eq__(self, other):
+        """ Tests if two move objects are equal to one another"""
+        return (
+            self.start_coords == other.start_coords
+            and other.end_coords == self.end_coords
+        )
+
+
+def legal_move(board, start, end, black=False, _checktest=False):
+    """ Checking if the move follows any of the rules, which includes
+    being that type of peice"""
+    (x, y) = start
+    (ax, ay) = end
+
+    ## Checking each individual move function to see if the move is legal, and then checking
+    ## to make sure the piece isn't taking his own man
+
+    ## Checking to see that the move doesn't put the king in check
+    ##temp_board = chessboard(board)
+    ##temp_board.move_piece(start, end)
+
+    return (
+        (
+            ## Legal move for all peices
+            legal_white_pawn(board, start, end)
+            or legal_black_pawn(board, start, end)
+            or legal_rook(board, start, end)
+            or legal_horse(board, start, end)
+            or legal_bishop(board, start, end)
+            or legal_king(board, start, end)
+            or legal_queen(board, start, end)
+        )
+        and (
+            ## No player taking player, only moving your own peices
+            (
+                not black
+                and board.pieces[y][x].islower()
+                and not board.pieces[ay][ax].islower()
+            )
+            or (
+                black
+                and board.pieces[y][x].isupper()
+                and not board.pieces[ay][ax].isupper()
+            )
+            ## No taking king unless in checkmate
+        )
+        and ( _checktest or
+            not (
+                board.pieces[ay][ax] in "Kk"
+                and not checkmate(board, board.pieces[ay][ax].isupper())
+            )
+        )
+        ## Must impliment that the player cannot end a round in check
+        ##and not (check(board) == True, black)
+    )
+
+
+def legal_white_pawn(board, start, end):
+
+    x1, y1 = start
+    x2, y2 = end
+
+    if board.pieces[y1][x1] != board.pawn[1]:
+        return False
+
+    dx = abs(x2 - x1)
+    dy = y2 - y1
+
+    # Can move the pawn if...
+    # Moving one forward with no horizontal movement, and with no one in front
+    if dy == 1 and dx == 0 and board.pieces[y2][x2] == " ":
+        return True
+    # Moving two forward with no horizontal movement, and with no one within two spaces
+    elif (
+        dy == 2
+        and dx == 0
+        and y1 == 1
+        and board.pieces[y1 + 1][x2] == " "
+        and board.pieces[y1 + 2][x2] == " "
+    ):
+        return True
+    # If someone is adjecant and the player moves there
+    elif board.pieces[y2][x2].isupper() and dy == 1 and dx == 1:
+        return True
+    # Otherwise false
+    else:
+        return False
+
+
+def legal_black_pawn(board, start, end):
+
+    x1, y1 = start
+    x2, y2 = end
+
+    if board.pieces[y1][x1] != board.pawn[0]:
+        return False
+
+    dx = abs(x2 - x1)
+    dy = y2 - y1
+
+    # Can move the pawn if...
+    # Moving one backward with no horizontal movement, and with no one in behind
+    if dy == -1 and dx == 0 and board.pieces[y2][x2] == " ":
+        return True
+
+    # Moving two backward with no horizontal movement, and with no one within the two spaces
+    elif (
+        dy == -2
+        and dx == 0
+        and y1 == 6
+        and board.pieces[y1 - 1][x2] == " "
+        and board.pieces[y1 - 2][x2] == " "
+    ):
+        return True
+    # If someone is adjecent and the player moves there
+    elif board.pieces[y2][x2].islower() and dy == -1 and dx == 1:
+        return True
+    # Otherwise False
+    else:
+        return False
+
+
+def legal_rook(board, start, end, queen=False):
+
+    x1, y1 = start
+    x2, y2 = end
+
+    if (board.pieces[y1][x1] not in board.rook) and not queen:
+        return False
+
+    dx = abs(x2 - x1)
+    dy = abs(y2 - y1)
+
+    ## Testing for pieces in the current pieces path of travel
+    ## Horizontal
+    if x2 > x1 and dy == 0:
+        for x in range(1, dx):
+            if board.pieces[y1][x1 + x] != " ":
+                return False
+
+    if x2 < x1 and dy == 0:
+        for x in range(1, dx):
+            if board.pieces[y1][x2 + x] != " ":
+                return False
+    ## Verticle
+    if y2 > y1 and dx == 0:
+        for x in range(1, dy):
+            if board.pieces[y1 + x][x1] != " ":
+                return False
+
+    if y2 < y1 and dx == 0:
+        for x in range(1, dy):
+            if board.pieces[y2 + x][x1] != " ":
+                return False
+
+    # Can move if only going in one direction
+    if dy and not dx:
+        return True
+    elif dx and not dy:
+        return True
+    else:
+        return False
+
+
+def legal_horse(board, start, end):
+    x1, y1 = start
+    x2, y2 = end
+
+    if board.pieces[y1][x1] not in board.horse:
+        return False
+
+    dx = abs(x2 - x1)
+    dy = abs(y2 - y1)
+
+    ## Can move if going two spaces in one direction and one in another
+    ## It doesnt matter if anyone is in the way
+    if dy == 2 and dx == 1:
+        return True
+    elif dy == 1 and dx == 2:
+        return True
+    else:
+        return False
+
+
+def legal_bishop(board, start, end, queen=False):
+
+    x1, y1 = start
+    x2, y2 = end
+
+    if (board.pieces[y1][x1] not in board.bishop) and not queen:
+        return False
+
+    dx = abs(x2 - x1)
+    dy = abs(y2 - y1)
+
+    # Cannot move if they are not moving the same distance x and y
+    if dy != dx:
+        return False
+
+    # Check to see if the bishop's path is open
+    if x1 < x2:
+        directionX = 1
+    else:
+        directionX = -1
+
+    if y1 < y2:
+        directionY = 1
+    else:
+        directionY = -1
+
+    for a in range(1, dx):
+        if board.pieces[y1 + (a * directionY)][x1 + (a * directionX)] != " ":
+            return False
+    return True
+
+
+def legal_king(board, start, end):
+
+    x1, y1 = start
+    x2, y2 = end
+
+    if board.pieces[y1][x1] not in board.king:
+        return False
+
+    dx = abs(x2 - x1)
+    dy = abs(y2 - y1)
+
+    # Can only move 1 tile in 1 direction
+    if dy < 2 and dx < 2:
+        return True
+    else:
+        return False
+
+
+def legal_queen(board, start, end):
+
+    x1, y1 = start
+    x2, y2 = end
+
+    if board.pieces[y1][x1] not in board.queen:
+        return False
+
+    ## A queen is the same as a rook and bishop combined
+    return legal_bishop(board, start, end, True) or legal_rook(board, start, end, True)
+
+
+def get_move(board=False, black=False):
+    letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
+    while True:
+        try:
+            raw = input(">>> ").upper()
+            start = (letters.index(raw[0]), int(raw[1]))
+            end = (letters.index(raw[2]), int(raw[3]))
+            break
+        except:
+            print("Invalid Input")
+            pass
+
+    new_move = move(board, start, end, black)
+    return new_move
+
+
+def draw_board(board, flipped=False):
+    """ Prints the chess board from the white perspective unless
+    flipped = True, when it goes from the black perspective"""
+
+    if not flipped:
+        print("     A     B     C     D     E     F     G     H")
+        print("  :-----:-----:-----:-----:-----:-----:-----:-----: ")
+        for y in range(8):
+            print(y, end="")
+            for x in range(8):
+                print(" :  " + board.pieces[y][x], end=" ")
+            print(" : \n  :-----:-----:-----:-----:-----:-----:-----:-----: ")
+    else:
+        print("     A     B     C     D     E     F     G     H")
+        print("  :-----:-----:-----:-----:-----:-----:-----:-----: ")
+        for y in range(7, -1, -1):
+            print(y, end="")
+            for x in range(8):
+                print(" :  " + board.pieces[y][x], end=" ")
+            print(" : \n  :-----:-----:-----:-----:-----:-----:-----:-----: ")
+
+
+def check(board):
+    ## Finding the positions of both kings, returns two bools. in_check, is_black
+    white_king_coords = (0, 0)
+    black_king_coords = (0, 0)
+
+    for x in range(8):
+        for y in range(8):
+            if board.pieces[y][x] == "k":
+                white_king_coords = (x, y)
+            if board.pieces[y][x] == "K":
+                black_king_coords = (x, y)
+
+    for x in range(8):
+        for y in range(8):
+            if legal_move(board, (x, y), white_king_coords, True, True):
+                return True, False
+            if legal_move(board, (x, y), black_king_coords, False, True):
+                return True, True
+        return False, False
+
+
+def checkmate(board, black=False):
+    ## Returns bool if black is in checkmate
     ## Iterating through every possible move on the board
+    temp_board = chessboard(board)
     for sx in range(8):
         for sy in range(8):
             for ex in range(8):
                 for ey in range(8):
-                    if ChessBoard.legal_move(board, (sx,sy),(ex,ey), black):
-                        legal_moves.append(ChessBoard.move(board,(sx,sy),(ex,ey),black))
-    return legal_moves
+                    ##moving peice to see if it can cancel check
+                    temp_board.move_piece((sx, sy), (ex, ey))
+                    ## If the move cancels check and is legal
+                    if not check(temp_board) and legal_move(
+                        temp_board, (sx, sy), (ex, ey), black, True
+                    ):
+                        return False
+                    ##moving peice back
+                    temp_board.move_piece((ex, ey), (sx, sy))
 
-def score(board, score_move, black = True):
-    """ Scores the curret move based on how many peices are on the board after the move is executed"""
-    
-    temp_board = ChessBoard.chessboard(board)
-    start, end = tuple(score_move)
-    temp_board.move_piece(start, end)
-    
-    scores = {"p":10, "r":20, "h":30,"b":40, "q":100, "k":1000}
-    total_score = 0
-    for x in range(8):
-        for y in range(8):
-            piece = temp_board.pieces[y][x]
-            if piece != " ":
-                if (piece.isupper() and black) or (piece.islower() and not black):
-                    total_score += scores[piece.lower()]
-                else:
-                    total_score -= scores[piece.lower()]
-    temp_board.move_piece(end, start)
-    return total_score
 
-def recur_score_move(depth, board, black=True, curr_depth = 0):
-    """ Scores the board by recursing `depth` moves deep. Prunes tree based by only taking the best half
-    of moves"""
-    
-    tot_score = 0
-    
-    ## Finding all the legal moves for the computer
-    moves = gen_possible_moves(board, black)
-    
-    ## Pruning, finding the best `number` of moves
-    
-    ##Scoring
-    for move in moves:
-        move.score = score(board, move, black)
-        tot_score += move.score
-    ## Sorting by score
-    sorted_moves = sorted(moves, key=lambda x: x.score, reverse=True)
-    moves = sorted_moves[0:3]
-
-        
-    
-    if curr_depth < depth:
-        ## Runs if the maximum recursion depth is not reached
-        
-        ## Scoring all the moves
-        for move in moves: 
-            ## Creating a new board, where the move was executed
-            new_board = ChessBoard.chessboard(board)
-            new_board.move_piece(move.start_coords, move.end_coords)
-            
-            ## Scoring the move by adding all its own possible moves and subtracting the others. Deals with averages
-            tot_score -= recur_score_move(depth, new_board, black = not black, curr_depth = curr_depth + 1)/(3**depth)
-        
-    ## returning score to collapse tree if not root
-    ##print(curr_depth)
-    
-    ## If computer's turn to move, curr_depth will be an odd number and score will be returned positive
-    ##if curr_depth%2:
-    #os.system('cls')
-    #ChessBoard.draw_board(board, True)
-    return tot_score
-    
-## If player's turn to move, curr_depth will be an even numver and score will be returned negetive
-    ##else:
-        ##return -score
-    
-def best_move(board, depth, black=True):
-    """ Scores all the possible moves for the computer make by calling recur_score_move() on each move"""
-    moves = gen_possible_moves(board, black)
-    
-    ## For viewing processing time
-    print("Legal Moves: " + str(len(moves)))
-    print("-"*len(moves))
-        
-    
-    for move in moves:
-        print("#",end="")
-        ## Creating a new board, where the move was executed
-        new_board = ChessBoard.chessboard(board)
-        ## Executing and scoreing move
-        new_board.move_piece(move.start_coords, move.end_coords)
-        move.score = score(board, move, black)
-        
-        ## Recursively scoring next gen possible moves
-        move.score += recur_score_move(depth, new_board, black= black, curr_depth = 0)
-        
-    print()
-    
-    ## Creating new, blank move with default score to be compared to max_move
-    max_move = moves[0]
-     
-    ## Finding the highest scoring move
-    for move in moves:
-        if move.score > max_move.score:
-            max_move = move
-     
-    return max_move
-    
-def player_v_CPU():
-    while ("k" in sum(board.pieces,[])) and ("K" in sum(board.pieces,[])):
-        ChessBoard.draw_board(board, True)
-        
-        user_move = ChessBoard.get_move(board,False)
-        while not user_move.legal_move:
-            print("Illegal Move")
-            print(user_move.black)
-            user_move = ChessBoard.get_move(board,False)
-        user_move.execute()
-
-        ## Testing for King in check
-        is_check, is_black = ChessBoard.check(board)
-        if is_check:
-            print(("Black" * is_black)+("White" * (not is_black)) + " king is in check!")
-        
-        max_move = best_move(board, 4, True)
-        max_move.execute()
-
-        ## Testing for King in check
-        is_check, is_black = ChessBoard.check(board)
-        if is_check:
-            print(("Black" * is_black)+("White" * (not is_black)) + " king is in check!")
-        
-        ## Ascii bell tone
-        print('\a')
-    
-        print("<<<",end=" ")
-        print("Move: " + str(max_move))
-        print("    Score: " + str(max_move.score))
-
-def CPU_v_CPU():
+if __name__ == "__main__":
+    turn = 0
+    board = chessboard()
     while True:
-        
-        ChessBoard.draw_board(board, True)
-        
-        A_max_move = best_move(board, 3, False)
-        A_max_move.execute()
-        
-        print("<<<",end=" ")
-        print("Move: " + str(A_max_move))
-        print("    Score: " + str(A_max_move.score))
-        
-        B_max_move = best_move(board, 3, True)
-        B_max_move.execute()
-
-    
-        print("<<<",end=" ")
-        print("Move: " + str(B_max_move))
-        print("    Score: " + str(B_max_move.score))
-        
-        ## Ascii bell tone
-        print('\a')
-        
-##CPU_v_CPU()
-player_v_CPU()
+        draw_board(board, turn % 2)
+        new_move = get_move(board, turn % 2)
+        while not new_move.legal_move:
+            print("Illegal Move")
+            new_move = get_move(board, turn % 2)
+        new_move.execute()
+        turn += 1
