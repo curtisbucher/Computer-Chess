@@ -75,17 +75,11 @@ def recur_score_move(depth, board, black=True, curr_depth=0):
             new_board.move_piece(move.start_coords, move.end_coords)
 
             ## Scoring the move by adding all its own possible moves and subtracting the others. Deals with averages
-<<<<<<< HEAD
             tot_score -= recur_score_move(
                 depth, new_board, black=not black, curr_depth=curr_depth + 1
             ) / (
                 PRUNE
             )  ## ** depth)
-
-=======
-            tot_score -= recur_score_move(depth, new_board, black = not black, curr_depth = curr_depth + 1)/(3**depth)
-        
->>>>>>> c93a670cb0393e3e9ce55e77f231ca14c2f8f8ef
     ## returning score to collapse tree if not root
     ##print(curr_depth)
 
