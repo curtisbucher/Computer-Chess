@@ -44,10 +44,6 @@ def score(board, score_move, black=True):
     temp_board.move_piece(end, start)
     return total_score
 
-def alphabeta(board, depth, alpha, beta, black=True):
-    if depth == 0:
-        pass
-
 def recur_score_move(depth, board, black=True, curr_depth=0):
     """ Scores the board by recursing `depth` moves deep. Prunes tree based by only taking the best half
     of moves"""
