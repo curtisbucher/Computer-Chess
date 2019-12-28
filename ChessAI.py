@@ -44,9 +44,55 @@ def score(board, score_move, black=True):
     temp_board.move_piece(end, start)
     return total_score
 
+def new_score(board, black=True):
+    """ Scores the curret move based on how many peices are on the board after the move is executed"""
+    offensive_scores = {"p": 1, "r": 5, "h": 3, "b": 3, "q": 9, "k": 130}
+    defensive_scores = {"p": 1, "r": 5, "h": 3, "b": 3, "q": 9, "k": 40}
+
+    total_score = 0
+    for (x, y) in itertools.product(range(8), range(8)):
+        piece = board.pieces[y][x]
+        if piece != " ":
+            if piece.isupper() == black:  # upper and black or lower and not black
+                total_score += offensive_scores[piece.lower()]
+            else:
+                total_score -= defensive_scores[piece.lower()]
+    return total_score
+
+
 def alphabeta(board, depth, alpha, beta, black=True):
-    if depth == 0:
-        pass
+    if not depth:
+        return new_score(board, black=black)
+    if black:
+        value = -math.inf
+        ## Calculating node children
+        for move in gen_possible_moves(board, black):
+
+            ## Creating a new child board that impliments the child
+            child = ChessBoard.chessboard(board)
+            child.move_piece(move.start_coords, move.end_coords)
+            ## Recursing down the child node
+            value = max(value, alphabeta(child, depth -1, alpha, beta, False) )
+
+            alpha = max(alpha, value)
+            if alpha >= beta:
+                break
+            return value
+    else:
+        value = math.inf
+        ## Calculating node children
+        for move in gen_possible_moves(board, black):
+
+            ## Creating a new child board that impliments the child
+            child = ChessBoard.chessboard(board)
+            child.move_piece(move.start_coords, move.end_coords)
+            ## Recursing down the child node
+            value = min(value, alphabeta(child, depth -1, alpha, beta, True) )
+
+            beta = min(beta, value)
+            if alpha >= beta:
+                break
+            return value
 
 def recur_score_move(depth, board, black=True, curr_depth=0):
     """ Scores the board by recursing `depth` moves deep. Prunes tree based by only taking the best half
@@ -112,14 +158,16 @@ def best_move(board, depth, black=True):
         new_board = ChessBoard.chessboard(board)
         # Executing and scoreing move`
         new_board.move_piece(move.start_coords, move.end_coords)
-        move.score = score(board, move, black)
+        #move.score = score(board, move, black)
 
-        # Recursively scoring next gen possible moves
+        """# Recursively scoring next gen possible moves
         move.score -= recur_score_move(
             depth, new_board, black=not black, curr_depth=0
         ) / (
             PRUNE
         )  # ** depth)
+        """
+        move.score = -alphabeta(new_board, depth, -math.inf, math.inf, black)
 
     print()
 
@@ -200,5 +248,5 @@ def CPU_v_CPU():
         print("\a")
 
 
-# CPU_v_CPU()
-player_v_CPU()
+CPU_v_CPU()
+#player_v_CPU()
