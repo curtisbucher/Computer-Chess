@@ -44,6 +44,9 @@ def score(board, score_move, black=True):
     temp_board.move_piece(end, start)
     return total_score
 
+def alphabeta(board, depth, alpha, beta, black=True):
+    if depth == 0:
+        pass
 
 def recur_score_move(depth, board, black=True, curr_depth=0):
     """ Scores the board by recursing `depth` moves deep. Prunes tree based by only taking the best half
@@ -59,7 +62,6 @@ def recur_score_move(depth, board, black=True, curr_depth=0):
     # Scoring
     for move in moves:
         move.score = score(board, move, black)
-        tot_score += move.score
 
     # Sorting by score
     sorted_moves = sorted(moves, key=lambda x: x.score, reverse=True)
@@ -74,7 +76,8 @@ def recur_score_move(depth, board, black=True, curr_depth=0):
             new_board = ChessBoard.chessboard(board)
             new_board.move_piece(move.start_coords, move.end_coords)
 
-            # Scoring the move by adding all its own possible moves and subtracting the others. Deals with averages
+            # Scoring the move by adding all its own possible moves and subtracting the others. 
+            # Deals with averages
             tot_score -= recur_score_move(
                 depth, new_board, black=not black, curr_depth=curr_depth + 1
             ) / (
@@ -132,10 +135,15 @@ def best_move(board, depth, black=True):
 
 
 def player_v_CPU():
-    while ("k" in sum(board.pieces, [])) and ("K" in sum(board.pieces, [])):
+    quit = False
+    while ("k" in sum(board.pieces, [])) and ("K" in sum(board.pieces, []) and quit == False):
         ChessBoard.draw_board(board, True)
 
         user_move = ChessBoard.get_move(board, False)
+        if not user_move:
+            print("Terminating...")
+            break
+
         while not user_move.legal_move:
             print("Illegal Move")
             print(user_move.black)

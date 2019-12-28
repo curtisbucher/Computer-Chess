@@ -335,6 +335,8 @@ def get_move(board=False, black=False):
     while True:
         try:
             raw = input(">>> ").upper()
+            if raw == "QUIT":
+                return False
             start = (letters.index(raw[0]), int(raw[1]))
             end = (letters.index(raw[2]), int(raw[3]))
             break
