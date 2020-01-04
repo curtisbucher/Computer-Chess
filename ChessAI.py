@@ -6,9 +6,7 @@ from functools import lru_cache
 import itertools
 
 board = ChessBoard.chessboard()
-# Variables for pruning
 DEPTH = 3
-PRUNE = 3
 
 
 def gen_possible_moves(board, black=True):
@@ -21,28 +19,6 @@ def gen_possible_moves(board, black=True):
             legal_moves.append(ChessBoard.move(
                 board, (sx, sy), (ex, ey), black))
     return legal_moves
-
-
-def score(board, score_move, black=True):
-    """ Scores the curret move based on how many peices are on the board after the move is executed"""
-
-    temp_board = ChessBoard.chessboard(board)
-    start, end = tuple(score_move)
-    temp_board.move_piece(start, end)
-
-    offensive_scores = {"p": 2, "r": 6, "h": 4, "b": 4, "q": 10, "k": 130}
-    defensive_scores = {"p": 1, "r": 5, "h": 3, "b": 3, "q": 9, "k": 40}
-
-    total_score = 0
-    for (x, y) in itertools.product(range(8), range(8)):
-        piece = temp_board.pieces[y][x]
-        if piece != " ":
-            if piece.isupper() == black:  # upper and black or lower and not black
-                total_score += offensive_scores[piece.lower()]
-            else:
-                total_score -= defensive_scores[piece.lower()]
-    temp_board.move_piece(end, start)
-    return total_score
 
 
 def new_score(board):
@@ -102,56 +78,6 @@ def alphabeta(board, depth, alpha, beta, black=True):
         return value
 
 
-def recur_score_move(depth, board, black=True, curr_depth=0):
-    """ Scores the board by recursing `depth` moves deep. Prunes tree based by only taking the best half
-    of moves"""
-
-    tot_score = 0
-
-    # Finding all the legal moves for the computer
-    moves = gen_possible_moves(board, black)
-
-    # Pruning, finding the best `number` of moves
-
-    # Scoring
-    for move in moves:
-        move.score = score(board, move, black)
-
-    # Sorting by score
-    sorted_moves = sorted(moves, key=lambda x: x.score, reverse=True)
-    moves = sorted_moves[0:PRUNE]
-
-    if curr_depth < depth:
-        # Runs if the maximum recursion depth is not reached
-
-        # Scoring all the moves
-        for move in moves:
-            # Creating a new board, where the move was executed
-            new_board = ChessBoard.chessboard(board)
-            new_board.move_piece(move.start_coords, move.end_coords)
-
-            # Scoring the move by adding all its own possible moves and subtracting the others.
-            # Deals with averages
-            tot_score -= recur_score_move(
-                depth, new_board, black=not black, curr_depth=curr_depth + 1
-            ) / (
-                PRUNE
-            )  # ** depth)
-    # returning score to collapse tree if not root
-    # print(curr_depth)
-
-    # If computer's turn to move, curr_depth will be an odd number and score will be returned positive
-    # if curr_depth%2:
-    # os.system('cls')
-    # ChessBoard.draw_board(board, True)
-    return tot_score
-
-
-# If player's turn to move, curr_depth will be an even numver and score will be returned negetive
-# else:
-# return -score
-
-
 def best_move(board, depth, black=True):
     """ Scores all the possible moves for the computer make by calling recur_score_move() on each move"""
     moves = gen_possible_moves(board, black)
@@ -167,14 +93,6 @@ def best_move(board, depth, black=True):
         # Executing and scoreing move`
         new_board.move_piece(move.start_coords, move.end_coords)
         # move.score = score(board, move, black)
-
-        """# Recursively scoring next gen possible moves
-        move.score -= recur_score_move(
-            depth, new_board, black=not black, curr_depth=0
-        ) / (
-            PRUNE
-        )  # ** depth)
-        """
         move.score = alphabeta(new_board, depth, -math.inf, math.inf, black)
 
     print()
@@ -186,7 +104,6 @@ def best_move(board, depth, black=True):
     for move in moves:
         if move.score > max_move.score:
             max_move = move
-
     return max_move
 
 
