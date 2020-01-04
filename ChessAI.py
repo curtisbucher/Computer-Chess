@@ -1,8 +1,6 @@
 import ChessBoard
 import random
 import math
-import os
-from functools import lru_cache
 import itertools
 from multiprocessing import Pool, cpu_count
 
@@ -93,7 +91,6 @@ def score_branch(args):
 def best_move(board, depth, black=True):
     """ Scores all the possible moves for the computer make by calling recur_score_move() on each move"""
     moves = gen_possible_moves(board, black)
-    print(id(moves[0]))
 
     # For viewing processing time
     print("Legal Moves: " + str(len(moves)))
@@ -165,16 +162,16 @@ def player_v_CPU():
 def CPU_v_CPU():
     while True:
 
-        ChessBoard.draw_board(board, True)
+        ChessBoard.draw_board(BOARD, True)
 
-        A_max_move = best_move(board, DEPTH, False)
+        A_max_move = best_move(BOARD, DEPTH, False)
         A_max_move.execute()
 
         print("<<<", end=" ")
         print("Move: " + str(A_max_move))
         print("    Score: " + str(A_max_move.score))
 
-        B_max_move = best_move(board, DEPTH, True)
+        B_max_move = best_move(BOARD, DEPTH, True)
         B_max_move.execute()
 
         print("<<<", end=" ")
