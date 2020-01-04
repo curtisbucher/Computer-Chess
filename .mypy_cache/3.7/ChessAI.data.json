@@ -1,1 +1,241 @@
-{".class": "MypyFile", "_fullname": "ChessAI", "is_partial_stub_package": false, "is_stub": false, "names": {".class": "SymbolTable", "BOARD": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "Var", "flags": [], "fullname": "ChessAI.BOARD", "name": "BOARD", "type": "ChessBoard.chessboard"}}, "CPU_v_CPU": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "FuncDef", "arg_kinds": [], "arg_names": [], "flags": [], "fullname": "ChessAI.CPU_v_CPU", "name": "CPU_v_CPU", "type": null}}, "ChessBoard": {".class": "SymbolTableNode", "cross_ref": "ChessBoard", "kind": "Gdef"}, "DEPTH": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "Var", "flags": ["is_ready"], "fullname": "ChessAI.DEPTH", "name": "DEPTH", "type": "builtins.int"}}, "Pool": {".class": "SymbolTableNode", "cross_ref": "multiprocessing.Pool", "kind": "Gdef"}, "__doc__": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "Var", "flags": ["is_ready"], "fullname": "ChessAI.__doc__", "name": "__doc__", "type": "builtins.str"}}, "__file__": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "Var", "flags": ["is_ready"], "fullname": "ChessAI.__file__", "name": "__file__", "type": "builtins.str"}}, "__name__": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "Var", "flags": ["is_ready"], "fullname": "ChessAI.__name__", "name": "__name__", "type": "builtins.str"}}, "__package__": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "Var", "flags": ["is_ready"], "fullname": "ChessAI.__package__", "name": "__package__", "type": "builtins.str"}}, "alphabeta": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "FuncDef", "arg_kinds": [0, 0, 0, 0, 1], "arg_names": ["board", "depth", "alpha", "beta", "black"], "flags": [], "fullname": "ChessAI.alphabeta", "name": "alphabeta", "type": null}}, "best_move": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "FuncDef", "arg_kinds": [0, 0, 1], "arg_names": ["board", "depth", "black"], "flags": [], "fullname": "ChessAI.best_move", "name": "best_move", "type": null}}, "cpu_count": {".class": "SymbolTableNode", "cross_ref": "multiprocessing.cpu_count", "kind": "Gdef"}, "gen_possible_moves": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "FuncDef", "arg_kinds": [0, 1], "arg_names": ["board", "black"], "flags": [], "fullname": "ChessAI.gen_possible_moves", "name": "gen_possible_moves", "type": null}}, "itertools": {".class": "SymbolTableNode", "cross_ref": "itertools", "kind": "Gdef"}, "lru_cache": {".class": "SymbolTableNode", "cross_ref": "functools.lru_cache", "kind": "Gdef"}, "math": {".class": "SymbolTableNode", "cross_ref": "math", "kind": "Gdef"}, "os": {".class": "SymbolTableNode", "cross_ref": "os", "kind": "Gdef"}, "player_v_CPU": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "FuncDef", "arg_kinds": [], "arg_names": [], "flags": [], "fullname": "ChessAI.player_v_CPU", "name": "player_v_CPU", "type": null}}, "random": {".class": "SymbolTableNode", "cross_ref": "random", "kind": "Gdef"}, "score_board": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "FuncDef", "arg_kinds": [0], "arg_names": ["board"], "flags": [], "fullname": "ChessAI.score_board", "name": "score_board", "type": null}}, "score_branch": {".class": "SymbolTableNode", "kind": "Gdef", "node": {".class": "FuncDef", "arg_kinds": [0], "arg_names": ["args"], "flags": [], "fullname": "ChessAI.score_branch", "name": "score_branch", "type": null}}}, "path": "/Users/curtisbucher/Desktop/Programs/Computer-Chess/ChessAI.py"}
+{
+    ".class": "MypyFile",
+    "_fullname": "ChessAI",
+    "is_partial_stub_package": false,
+    "is_stub": false,
+    "names": {
+        ".class": "SymbolTable",
+        "BOARD": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "Var",
+                "flags": [],
+                "fullname": "ChessAI.BOARD",
+                "name": "BOARD",
+                "type": "ChessBoard.chessboard"
+            }
+        },
+        "CPU_v_CPU": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "FuncDef",
+                "arg_kinds": [],
+                "arg_names": [],
+                "flags": [],
+                "fullname": "ChessAI.CPU_v_CPU",
+                "name": "CPU_v_CPU",
+                "type": null
+            }
+        },
+        "ChessBoard": {
+            ".class": "SymbolTableNode",
+            "cross_ref": "ChessBoard",
+            "kind": "Gdef"
+        },
+        "DEPTH": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "Var",
+                "flags": [
+                    "is_ready"
+                ],
+                "fullname": "ChessAI.DEPTH",
+                "name": "DEPTH",
+                "type": "builtins.int"
+            }
+        },
+        "Pool": {
+            ".class": "SymbolTableNode",
+            "cross_ref": "multiprocessing.Pool",
+            "kind": "Gdef"
+        },
+        "__doc__": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "Var",
+                "flags": [
+                    "is_ready"
+                ],
+                "fullname": "ChessAI.__doc__",
+                "name": "__doc__",
+                "type": "builtins.str"
+            }
+        },
+        "__file__": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "Var",
+                "flags": [
+                    "is_ready"
+                ],
+                "fullname": "ChessAI.__file__",
+                "name": "__file__",
+                "type": "builtins.str"
+            }
+        },
+        "__name__": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "Var",
+                "flags": [
+                    "is_ready"
+                ],
+                "fullname": "ChessAI.__name__",
+                "name": "__name__",
+                "type": "builtins.str"
+            }
+        },
+        "__package__": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "Var",
+                "flags": [
+                    "is_ready"
+                ],
+                "fullname": "ChessAI.__package__",
+                "name": "__package__",
+                "type": "builtins.str"
+            }
+        },
+        "alphabeta": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "FuncDef",
+                "arg_kinds": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    1
+                ],
+                "arg_names": [
+                    "board",
+                    "depth",
+                    "alpha",
+                    "beta",
+                    "black"
+                ],
+                "flags": [],
+                "fullname": "ChessAI.alphabeta",
+                "name": "alphabeta",
+                "type": null
+            }
+        },
+        "best_move": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "FuncDef",
+                "arg_kinds": [
+                    0,
+                    0,
+                    1
+                ],
+                "arg_names": [
+                    "board",
+                    "depth",
+                    "black"
+                ],
+                "flags": [],
+                "fullname": "ChessAI.best_move",
+                "name": "best_move",
+                "type": null
+            }
+        },
+        "cpu_count": {
+            ".class": "SymbolTableNode",
+            "cross_ref": "multiprocessing.cpu_count",
+            "kind": "Gdef"
+        },
+        "gen_possible_moves": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "FuncDef",
+                "arg_kinds": [
+                    0,
+                    1
+                ],
+                "arg_names": [
+                    "board",
+                    "black"
+                ],
+                "flags": [],
+                "fullname": "ChessAI.gen_possible_moves",
+                "name": "gen_possible_moves",
+                "type": null
+            }
+        },
+        "itertools": {
+            ".class": "SymbolTableNode",
+            "cross_ref": "itertools",
+            "kind": "Gdef"
+        },
+        "math": {
+            ".class": "SymbolTableNode",
+            "cross_ref": "math",
+            "kind": "Gdef"
+        },
+        "player_v_CPU": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "FuncDef",
+                "arg_kinds": [],
+                "arg_names": [],
+                "flags": [],
+                "fullname": "ChessAI.player_v_CPU",
+                "name": "player_v_CPU",
+                "type": null
+            }
+        },
+        "random": {
+            ".class": "SymbolTableNode",
+            "cross_ref": "random",
+            "kind": "Gdef"
+        },
+        "score_board": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "FuncDef",
+                "arg_kinds": [
+                    0
+                ],
+                "arg_names": [
+                    "board"
+                ],
+                "flags": [],
+                "fullname": "ChessAI.score_board",
+                "name": "score_board",
+                "type": null
+            }
+        },
+        "score_branch": {
+            ".class": "SymbolTableNode",
+            "kind": "Gdef",
+            "node": {
+                ".class": "FuncDef",
+                "arg_kinds": [
+                    0
+                ],
+                "arg_names": [
+                    "args"
+                ],
+                "flags": [],
+                "fullname": "ChessAI.score_branch",
+                "name": "score_branch",
+                "type": null
+            }
+        }
+    },
+    "path": "/Users/curtisbucher/Desktop/Programs/Computer-Chess/ChessAI.py"
+}

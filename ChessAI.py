@@ -1,8 +1,6 @@
 import ChessBoard
 import random
 import math
-import os
-from functools import lru_cache
 import itertools
 from multiprocessing import Pool, cpu_count
 
@@ -85,9 +83,9 @@ def score_branch(args):
     # Executing and scoreing move`
     new_board.move_piece(move.start_coords, move.end_coords)
     # move.score = score(board, move, black)
-    move.score = alphabeta(new_board, depth, -math.inf, math.inf, black)
+    score = alphabeta(new_board, depth, -math.inf, math.inf, black)
     print("#", end="", flush=True)
-    return move
+    return score
 
 
 def best_move(board, depth, black=True):
@@ -103,8 +101,11 @@ def best_move(board, depth, black=True):
     P = Pool(cpu_count())
     args = [(move, depth, black, ChessBoard.chessboard(board))
             for move in moves]
-    moves = P.map(score_branch, args)
-    print(id(moves[0]))
+    scores = P.map(score_branch, args)
+
+    for x in range(len(moves)):
+        moves[x].score = scores[x]
+
     print()
 
     # Creating new, blank move with default score to be compared to max_move
@@ -163,16 +164,16 @@ def player_v_CPU():
 def CPU_v_CPU():
     while True:
 
-        ChessBoard.draw_board(board, True)
+        ChessBoard.draw_board(BOARD, True)
 
-        A_max_move = best_move(board, DEPTH, False)
+        A_max_move = best_move(BOARD, DEPTH, False)
         A_max_move.execute()
 
         print("<<<", end=" ")
         print("Move: " + str(A_max_move))
         print("    Score: " + str(A_max_move.score))
 
-        B_max_move = best_move(board, DEPTH, True)
+        B_max_move = best_move(BOARD, DEPTH, True)
         B_max_move.execute()
 
         print("<<<", end=" ")
