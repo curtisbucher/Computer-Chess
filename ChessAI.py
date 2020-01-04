@@ -85,15 +85,14 @@ def score_branch(args):
     # Executing and scoreing move`
     new_board.move_piece(move.start_coords, move.end_coords)
     # move.score = score(board, move, black)
-    move.score = alphabeta(new_board, depth, -math.inf, math.inf, black)
+    score = alphabeta(new_board, depth, -math.inf, math.inf, black)
     print("#", end="", flush=True)
-    return move
+    return score
 
 
 def best_move(board, depth, black=True):
     """ Scores all the possible moves for the computer make by calling recur_score_move() on each move"""
     moves = gen_possible_moves(board, black)
-    print(id(moves[0]))
 
     # For viewing processing time
     print("Legal Moves: " + str(len(moves)))
@@ -103,8 +102,11 @@ def best_move(board, depth, black=True):
     P = Pool(cpu_count())
     args = [(move, depth, black, ChessBoard.chessboard(board))
             for move in moves]
-    moves = P.map(score_branch, args)
-    print(id(moves[0]))
+    scores = P.map(score_branch, args)
+
+    for x in range(len(moves)):
+        moves[x].score = scores[x]
+
     print()
 
     # Creating new, blank move with default score to be compared to max_move
