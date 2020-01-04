@@ -4,8 +4,9 @@ import math
 import os
 from functools import lru_cache
 import itertools
+from multiprocessing import Pool, cpu_count
 
-board = ChessBoard.chessboard()
+BOARD = ChessBoard.chessboard()
 DEPTH = 3
 
 
@@ -21,7 +22,7 @@ def gen_possible_moves(board, black=True):
     return legal_moves
 
 
-def new_score(board):
+def score_board(board):
     """ Scores the curret move based on how many peices are on the board after the move is executed"""
     offensive_scores = {"p": 1, "r": 5, "h": 3, "b": 3, "q": 9, "k": 130}
     defensive_scores = {"p": 1, "r": 5, "h": 3, "b": 3, "q": 9, "k": 40}
@@ -41,7 +42,7 @@ def alphabeta(board, depth, alpha, beta, black=True):
     # print(depth)
     if not depth:
         # ChessBoard.draw_board(board)
-        return new_score(board)
+        return score_board(board)
     if black:
         value = -math.inf
         # Calculating node children
@@ -78,23 +79,32 @@ def alphabeta(board, depth, alpha, beta, black=True):
         return value
 
 
+def score_branch(args):
+    move, depth, black, new_board = args
+    # Creating a new board, where the move was executed
+    # Executing and scoreing move`
+    new_board.move_piece(move.start_coords, move.end_coords)
+    # move.score = score(board, move, black)
+    move.score = alphabeta(new_board, depth, -math.inf, math.inf, black)
+    print("#", end="", flush=True)
+    return move
+
+
 def best_move(board, depth, black=True):
     """ Scores all the possible moves for the computer make by calling recur_score_move() on each move"""
     moves = gen_possible_moves(board, black)
+    print(id(moves[0]))
 
     # For viewing processing time
     print("Legal Moves: " + str(len(moves)))
     print("-" * len(moves))
 
-    for move in moves:
-        print("#", end="", flush=True)
-        # Creating a new board, where the move was executed
-        new_board = ChessBoard.chessboard(board)
-        # Executing and scoreing move`
-        new_board.move_piece(move.start_coords, move.end_coords)
-        # move.score = score(board, move, black)
-        move.score = alphabeta(new_board, depth, -math.inf, math.inf, black)
-
+    # Multiprocessing, one process for every branch to score
+    P = Pool(cpu_count())
+    args = [(move, depth, black, ChessBoard.chessboard(board))
+            for move in moves]
+    moves = P.map(score_branch, args)
+    print(id(moves[0]))
     print()
 
     # Creating new, blank move with default score to be compared to max_move
@@ -109,10 +119,10 @@ def best_move(board, depth, black=True):
 
 def player_v_CPU():
     quit = False
-    while ("k" in sum(board.pieces, [])) and ("K" in sum(board.pieces, []) and quit == False):
-        ChessBoard.draw_board(board, True)
+    while ("k" in sum(BOARD.pieces, [])) and ("K" in sum(BOARD.pieces, []) and quit == False):
+        ChessBoard.draw_board(BOARD, True)
 
-        user_move = ChessBoard.get_move(board, False)
+        user_move = ChessBoard.get_move(BOARD, False)
         if not user_move:
             print("Terminating...")
             break
@@ -120,22 +130,22 @@ def player_v_CPU():
         while not user_move.legal_move:
             print("Illegal Move")
             print(user_move.black)
-            user_move = ChessBoard.get_move(board, False)
+            user_move = ChessBoard.get_move(BOARD, False)
         user_move.execute()
 
         # Testing for King in check
-        is_check, is_black = ChessBoard.check(board)
+        is_check, is_black = ChessBoard.check(BOARD)
         if is_check:
             print(
                 ("Black" * is_black) + ("White" *
                                         (not is_black)) + " king is in check!"
             )
 
-        max_move = best_move(board, DEPTH, True)
+        max_move = best_move(BOARD, DEPTH, True)
         max_move.execute()
 
         # Testing for King in check
-        is_check, is_black = ChessBoard.check(board)
+        is_check, is_black = ChessBoard.check(BOARD)
         if is_check:
             print(
                 ("Black" * is_black) + ("White" *
