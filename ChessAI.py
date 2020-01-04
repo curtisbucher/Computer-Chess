@@ -93,6 +93,7 @@ def score_branch(args):
 def best_move(board, depth, black=True):
     """ Scores all the possible moves for the computer make by calling recur_score_move() on each move"""
     moves = gen_possible_moves(board, black)
+    print(id(moves[0]))
 
     # For viewing processing time
     print("Legal Moves: " + str(len(moves)))
@@ -106,7 +107,6 @@ def best_move(board, depth, black=True):
 
     for x in range(len(moves)):
         moves[x].score = scores[x]
-
     print()
 
     # Creating new, blank move with default score to be compared to max_move
