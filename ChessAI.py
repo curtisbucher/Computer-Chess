@@ -106,14 +106,16 @@ def best_move(board, depth, black=True):
         moves[x].score = scores[x]
     print()
 
-    # Creating new, blank move with default score to be compared to max_move
-    max_move = moves[0]
+    # A list of the moves tied for the highest value, a random choice will be taken from them
+    max_moves = [moves[0], ]
 
     # Finding the highest scoring move
     for move in moves:
-        if move.score > max_move.score:
-            max_move = move
-    return max_move
+        if move.score == max_moves[0].score:
+            max_moves.append(move)
+        elif move.score > max_moves[0].score:
+            max_move = [move, ]
+    return random.choice(max_moves)
 
 
 def player_v_CPU():
